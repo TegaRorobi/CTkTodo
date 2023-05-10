@@ -8,7 +8,9 @@ last_modidified:
 
 import customtkinter as ctk
 from PIL import Image
-import os
+import os, sqlite3
+from CTkMessagebox import CTkMessagebox
+
 
 class TodoApp(ctk.CTk):
 
@@ -114,24 +116,27 @@ class TodoApp(ctk.CTk):
 		# the home frame
 		self.home_frame = ctk.CTkFrame(master=self.main_frame, fg_color='transparent')
 		self.home_frame.grid_rowconfigure((0, 5), weight=1)
-		self.home_frame.grid_columnconfigure((0, 3), weight=1)
+		self.home_frame.grid_columnconfigure((0,1,2,3,4,5), weight=1)
+
+		self.home_user_label = ctk.CTkLabel(master=self.home_frame, text=f"User: {self.query_result[0][1].title()}", font=('Fira Code', 25))
+		self.home_user_label.grid(row=1, column=2, columnspan=2, pady=(15, 0))
 
 		self.todo_scrollable_frame = ctk.CTkScrollableFrame(master=self.home_frame, corner_radius=10, width=400, fg_color=("gray80", "gray20"))
-		self.todo_scrollable_frame.grid(row=1, column=1, columnspan=2, pady=25, sticky='news')
+		self.todo_scrollable_frame.grid(row=2, column=2, columnspan=2, pady=(15,25), padx=30, sticky='news')
 		self.todo_scrollable_frame.grid_columnconfigure(0, weight=1)
 		# self.todo_scrollable_frame.grid_rowconfigure(0, weight=1)
 
 		# self.main_textbox = ctk.CTkTextbox(master=self.textbox_scrollable_frame, font=("Fira Code", 16), corner_radius=10)
 		# self.main_textbox.grid(row=0, column=0, sticky='news')
 
-		self.todo_entry = ctk.CTkEntry(master=self.home_frame, font=("Fira Code", 16), height=30, placeholder_text="Enter your todos here...")
-		self.todo_entry.grid(row=2, column=1, columnspan=2, pady=15, sticky='ew')
+		self.todo_entry = ctk.CTkEntry(master=self.home_frame, font=("Fira Code", 16), height=35, placeholder_text="Enter your todos here...")
+		self.todo_entry.grid(row=3, column=2, columnspan=2, padx=40, pady=15, sticky='ew')
 
 		self.add_todo_btn = ctk.CTkButton(master=self.home_frame, hover_color=("gray70", "gray30"), text="Add Todo", fg_color='green', font=('Fira Code', 16), command=self.add_todo)
-		self.add_todo_btn.grid(row=3, column=1, padx=(0, 10), sticky='ew')
+		self.add_todo_btn.grid(row=4, column=2, padx=(40, 15), sticky='ew')
 
 		self.del_todo_btn = ctk.CTkButton(master=self.home_frame, hover_color=("gray70", "gray30"), text="Delete Todo", fg_color='red', font=('Fira Code', 16), command=self.delete_todo)
-		self.del_todo_btn.grid(row=3, column=2, padx=(10, 0), sticky='ew')
+		self.del_todo_btn.grid(row=4, column=3, padx=(15, 40), sticky='ew')
 
 
 
@@ -152,15 +157,28 @@ class TodoApp(ctk.CTk):
 		self.username = self.username_entry.get()
 		self.password = self.password_entry.get()
 
-		# the following simulates some form of database validation to allow access based on the 
-		# nature of the username and password.
-		if self.username and self.password and self.password.__len__() >= 4:
+		# create a connection and query the database to check for these credentials
+		conn = sqlite3.connect('database.db')
+		c = conn.cursor()
+		query = f"""
+			SELECT * FROM users 
+			WHERE username='{self.username}' 
+			AND password = '{self.password}'
+			"""
+		c.execute(query)
+		self.query_result = c.fetchall()
+		credentials_authorized = bool(self.query_result)
+		if credentials_authorized:
 			self.login_frame.grid_forget()    # clear the login frame 
 
 			self.prepare_main_frame()
 			self.main_frame.grid(row=0, column=0, sticky='nsew') # show the main frame
 		else:
-			print("Login failed, password too short!")
+			CTkMessagebox(
+                title="Verification Failed : Invalid Credentials", 
+                message="The username and password combination you entered is absent our database. Please verify your entry.", 
+                font=('Fira Code', 13), 
+                icon="cancel")
 
 		return
 
