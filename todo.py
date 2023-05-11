@@ -115,14 +115,14 @@ class TodoApp(ctk.CTk):
 
 		# the home frame
 		self.home_frame = ctk.CTkFrame(master=self.main_frame, fg_color='transparent')
-		self.home_frame.grid_rowconfigure((0, 5), weight=1)
+		self.home_frame.grid_rowconfigure((0, 2, 6, 7, 8), weight=1)
 		self.home_frame.grid_columnconfigure((0,1,2,3,4,5), weight=1)
 
 		self.home_user_label = ctk.CTkLabel(master=self.home_frame, text=f"User: {self.query_result[0][1].title()}", font=('Fira Code', 25))
 		self.home_user_label.grid(row=1, column=2, columnspan=2, pady=(15, 0))
 
 		self.todo_scrollable_frame = ctk.CTkScrollableFrame(master=self.home_frame, corner_radius=10, width=400, fg_color=("gray80", "gray20"))
-		self.todo_scrollable_frame.grid(row=2, column=2, columnspan=2, pady=(15,25), padx=30, sticky='news')
+		self.todo_scrollable_frame.grid(row=3, column=2, columnspan=2, pady=(15,25), padx=30, sticky='news')
 		self.todo_scrollable_frame.grid_columnconfigure(0, weight=1)
 		# self.todo_scrollable_frame.grid_rowconfigure(0, weight=1)
 
@@ -130,13 +130,13 @@ class TodoApp(ctk.CTk):
 		# self.main_textbox.grid(row=0, column=0, sticky='news')
 
 		self.todo_entry = ctk.CTkEntry(master=self.home_frame, font=("Fira Code", 16), height=35, placeholder_text="Enter your todos here...")
-		self.todo_entry.grid(row=3, column=2, columnspan=2, padx=40, pady=15, sticky='ew')
+		self.todo_entry.grid(row=4, column=2, columnspan=2, padx=40, pady=15, sticky='ew')
 
 		self.add_todo_btn = ctk.CTkButton(master=self.home_frame, hover_color=("gray70", "gray30"), text="Add Todo", fg_color='green', font=('Fira Code', 16), command=self.add_todo)
-		self.add_todo_btn.grid(row=4, column=2, padx=(40, 15), sticky='ew')
+		self.add_todo_btn.grid(row=5, column=2, padx=(40, 15), sticky='ew')
 
 		self.del_todo_btn = ctk.CTkButton(master=self.home_frame, hover_color=("gray70", "gray30"), text="Delete Todo", fg_color='red', font=('Fira Code', 16), command=self.delete_todo)
-		self.del_todo_btn.grid(row=4, column=3, padx=(15, 40), sticky='ew')
+		self.del_todo_btn.grid(row=5, column=3, padx=(15, 40), sticky='ew')
 
 
 
