@@ -8,16 +8,20 @@ last_modidified:
 
 import customtkinter as ctk
 from PIL import Image
-import os, sqlite3
+import os, sqlite3, logging
 from CTkMessagebox import CTkMessagebox
 
+logging.basicConfig(format="%(asctime)+10s ... %(name)+7s : %(levelname)+9s -> %(message)s",datefmt="%D %I:%M:%S %p", level=logging.INFO)
+logger = logging.getLogger(__file__.split('\\')[-1])
+# logger.propagate = 
 
 class TodoApp(ctk.CTk):
-
 	CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+	DB_NAME = 'db.db'
 
 	default_appearance_mode = 'Dark'
-	default_color_theme = 'blue'
+	default_color_theme = 'green'
+
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -27,7 +31,6 @@ class TodoApp(ctk.CTk):
 
 		# Configuring the window
 		self.title("A Customtkinter todo app made by Deciphrexx Labs. Inc.")
-		self.geometry("600x400")
 		# self.resizable(0, 0)
 		# self.minsize()
 		# self.maxsize()
@@ -38,6 +41,7 @@ class TodoApp(ctk.CTk):
 		self.grid_columnconfigure(0, weight=1)
 		self.grid_rowconfigure(0, weight=1)
 
+		
 		# start with the login frame
 		self.prepare_login_frame()
 		self.login_frame.grid(row=0, column=0, sticky='nsew', padx=90, pady=30)
@@ -46,35 +50,65 @@ class TodoApp(ctk.CTk):
 		# self.main_frame.grid(row=0, column=0, sticky='nsew') # show the main frame
 
 	def prepare_login_frame(self):
-		self.login_frame = ctk.CTkFrame(master=self, corner_radius=10)
+		self.geometry("600x400")
+		self.resizable(0, 0)
+
+		self.login_frame = ctk.CTkScrollableFrame(master=self, corner_radius=10)
 		self.login_frame.grid_columnconfigure((0, 2), weight=1)
-		self.login_frame.grid_rowconfigure((0, 6), weight=1)
+		self.login_frame.grid_rowconfigure((0, 7), weight=1)
 
 		self.welcome_label = ctk.CTkLabel(master=self.login_frame, text='Welcome!', font=('Fira Code', 40))
-		self.welcome_label.grid(row=1, column=1, pady=(20, 15), sticky='nsew')
+		self.welcome_label.grid(row=1, column=1, pady=(25, 15), sticky='nsew')
 
-		# username_label = ctk.CTkLabel(master=self.login_frame, text='Username:', font=('Fira Code', 15))
-		# username_label.grid(row=1, column=1, pady=20, padx=15, sticky='nsew')
-
-		self.username_entry = ctk.CTkEntry(master=self.login_frame, font=('Fira Code', 15), placeholder_text='Username')
+		self.username_entry = ctk.CTkEntry(master=self.login_frame, font=('Fira Code', 16), placeholder_text='Username')
 		self.username_entry.grid(row=2, column=1, pady=15, sticky='nsew')
 
-		# password_label = ctk.CTkLabel(master=self.login_frame, text='Password:', font=('Fira Code', 15))
-		# password_label.grid(row=2, column=1, pady=20, padx=15, sticky='nsew')
-
-		self.password_entry = ctk.CTkEntry(master = self.login_frame, show='X', font=('Fira Code', 15), placeholder_text='Password')
+		self.password_entry = ctk.CTkEntry(master = self.login_frame, show='0', font=('Fira Code', 16), placeholder_text='Password')
 		self.password_entry.grid(row=3, column=1, pady=15, sticky='nsew')
 
-		self.login_btn = ctk.CTkButton(master=self.login_frame, text='Login', font=('Fira Code', 15), command=self.login)
+		self.login_btn = ctk.CTkButton(master=self.login_frame, text='Login', font=('Fira Code', 16), command=self.login)
 		self.login_btn.grid(row=4, column=1, pady=15, sticky='nsew')
 
-		self.remember_me = ctk.CTkCheckBox(master=self.login_frame, text='Remember me')
+		self.remember_me = ctk.CTkCheckBox(master=self.login_frame, text='Remember me', font=('', 16))
 		self.remember_me.grid(row=5, column=1, pady=(15, 20))
 
+		self.show_register_frame_btn = ctk.CTkButton(master=self.login_frame, text='Register', font=('Fira Code', 16), command=self.prepare_and_grid_register_frame)
+		self.show_register_frame_btn.grid(row=6, column=1, pady=20)
 		return
 
+	def prepare_and_grid_register_frame(self):		
+		self.login_frame.grid_forget() # clear the login frame
+
+		# self.geometry("600x400")
+		self.resizable(0, 0)
+
+		self.register_frame = ctk.CTkFrame(master=self, corner_radius=0)
+		self.register_frame.grid_columnconfigure((0, 2), weight=1)
+		self.register_frame.grid_rowconfigure((0, 6), weight=1)
+
+		self.register_label = ctk.CTkLabel(master=self.register_frame, text='Register', font=('Fira Code', 40))
+		self.register_label.grid(row=1, column=1, pady=(20, 15), sticky='nsew')
+
+		self.username_reg_entry = ctk.CTkEntry(master=self.register_frame, placeholder_text='Enter your username', width=230, font=('Fira Code', 16))
+		self.username_reg_entry.grid(row=2, column=1, pady=15, sticky='nsew')
+
+		self.password_reg_entry = ctk.CTkEntry(master=self.register_frame, placeholder_text='Enter your password', width=230, font=('Fira Code', 16))
+		self.password_reg_entry.grid(row=3, column=1, pady=15, sticky='nsew')
+
+		self.register_btn = ctk.CTkButton(master=self.register_frame, text='Register', width=200, font=('Fira Code', 15), command=self.register_user)
+		self.register_btn.grid(row=4, column=1, pady=15, sticky='nsew')
+
+		self.auto_signin_checkbox = ctk.CTkCheckBox(master=self.register_frame, text="Automatic Signin", font=('', 16))
+		self.auto_signin_checkbox.configure(command=lambda :self.toggle_auto_signin())
+		self.auto_signin_checkbox.grid(row=5, column=1, pady=(15, 20))
+
+		self.auto_signin = False
+
+		self.register_frame.grid(row=0, column=0, sticky='nsew', padx=90, pady=30) # show the register frame
+
 	def prepare_main_frame(self):
-		self.geometry('700x450')
+		self.geometry('775x475')
+		self.resizable(True, True)
 
 		self.main_frame = ctk.CTkFrame(master=self, corner_radius=0)
 		self.main_frame.grid_columnconfigure(1, weight=1)
@@ -119,6 +153,12 @@ class TodoApp(ctk.CTk):
 			hover_color=('gray70', 'gray30'), font=('', 15), anchor='w', command=self.faq_btn_event)
 		self.faq_btn.grid(row=3, column=0, sticky='ew')
 
+		self.logout_btn_image = None
+		self.logout_btn = ctk.CTkButton(master=self.sidebar_frame, height=40, corner_radius=0, text=' Logout', 
+			fg_color='transparent', image=self.faq_btn_image, text_color=('gray10', 'gray90'),
+			hover_color=('gray70', 'gray30'), font=('', 15), anchor='w', command=self.logout)
+		self.logout_btn.grid(row=4, column=0, sticky='ew')
+
 		self.sidebar_buttons = self.home_btn, self.me_btn, self.faq_btn
 
 
@@ -136,7 +176,7 @@ class TodoApp(ctk.CTk):
 		self.home_frame.grid_rowconfigure((0, 2, 6, 7, 8), weight=1)
 		self.home_frame.grid_columnconfigure((0,1,2,3,4,5), weight=1)
 
-		self.home_user_label = ctk.CTkLabel(master=self.home_frame, text=f"User: {self.query_result[0][1].title()}", font=('Fira Code', 25))
+		self.home_user_label = ctk.CTkLabel(master=self.home_frame, text=f"User: {self.query_result[1].title()}", font=('Fira Code', 25))
 		self.home_user_label.grid(row=1, column=2, columnspan=2, pady=(15, 0))
 
 		self.todo_scrollable_frame = ctk.CTkScrollableFrame(master=self.home_frame, corner_radius=10, width=400, fg_color=("gray80", "gray20"))
@@ -175,22 +215,18 @@ class TodoApp(ctk.CTk):
 
 		return
 
-	def login(self):
-		self.username = self.username_entry.get()
-		self.password = self.password_entry.get()
+	def login(self, username=None, password=None):
+		username = username or self.username_entry.get()
+		password = password or self.password_entry.get()
 
 		# create a connection and query the database to check for these credentials
-		conn = sqlite3.connect('db.db')
+		conn = sqlite3.connect(self.DB_NAME)
 		c = conn.cursor()
-		query = f"""
-			SELECT * FROM users 
-			WHERE username='{self.username}' 
-			AND password = '{self.password}'
-		"""
-		c.execute(query)
-		self.query_result = c.fetchall()
+		c.execute(f"SELECT * FROM users WHERE username=? AND password=? LIMIT 1", (username, password))
+		self.query_result = c.fetchone()
 		credentials_authorized = bool(self.query_result)
 		if credentials_authorized:
+			logger.info(f"User record found : {self.query_result}")
 			self.login_frame.grid_forget()    # clear the login frame 
 
 			self.prepare_main_frame()
@@ -198,11 +234,46 @@ class TodoApp(ctk.CTk):
 		else:
 			CTkMessagebox(
                 title="Verification Failed : Invalid Credentials", 
-                message="The username and password combination you entered is absent our database. Please verify your entry.", 
+                message="The username and password combination you entered is absent our database. Please verify your entries.", 
                 font=('Fira Code', 13), 
                 icon="cancel")
 
 		return
+
+	def toggle_auto_signin(self):
+		try:
+			self.auto_signin = not self.auto_signin
+		except AttributeError:
+			self.auto_signin = True
+
+	def register_user(self):
+		username = self.username_reg_entry.get()
+		password = self.password_reg_entry.get()
+
+		conn = sqlite3.connect(self.DB_NAME)
+		c = conn.cursor()
+		c.execute(f"INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+		conn.commit()
+		c.execute("SELECT * FROM users WHERE users.username=? AND users.password=? LIMIT 1", (username, password))
+		usr_obj = c.fetchone()
+		if usr_obj: logger.info(f"User record : {usr_obj} inserted successfully.")
+
+		self.register_frame.grid_forget() # clear the register frame
+
+		logger.info(f'Auto signin : {self.auto_signin}')
+
+		if self.auto_signin:
+			self.query_result = usr_obj
+			self.login(username, password)
+			return
+
+		# show the login frame so the user can login with their newly created user object
+		self.login_frame.grid(row=0, column=0, sticky='nsew', padx=90, pady=30) 
+
+	def logout(self):
+		self.main_frame.grid_forget()
+		self.prepare_login_frame()
+		self.login_frame.grid(row=0, column=0, sticky='nsew', padx=90, pady=30)
 
 	def add_todo(self):
 		todo_txt = self.todo_entry.get()
