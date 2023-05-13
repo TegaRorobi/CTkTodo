@@ -86,31 +86,49 @@ class TodoApp(ctk.CTk):
 		self.sidebar_frame.grid_rowconfigure(5, weight=1)
 		self.sidebar_frame.grid_columnconfigure(0, weight=1)
 
-		self.logo_img = ctk.CTkImage(Image.open(os.path.join(self.CURRENT_DIR, 'logo.jpeg')), size=(40, 40))
+
+
+		self.logo_img = ctk.CTkImage(Image.open(os.path.join(self.CURRENT_DIR, 'images/logo.jpeg')), size=(40, 40))
 		self.logo_label = ctk.CTkLabel(master=self.sidebar_frame, image=self.logo_img, text="Deciphrexx.ToDo", compound='left', font=('Fira Code', 18))
 		self.logo_label.grid(row=0, column=0, sticky='ew', pady=(0, 20))
 
 		self.home_btn_image = ctk.CTkImage(
-			light_image=Image.open(os.path.join(self.CURRENT_DIR, 'home_dark.png')), # the image to be used in a light theme
-			dark_image=Image.open(os.path.join(self.CURRENT_DIR, 'home_light.png')), # the image to be used in a dark theme
+			light_image=Image.open(os.path.join(self.CURRENT_DIR, 'images/home_dark.png')), # the image to be used in a light theme
+			dark_image=Image.open(os.path.join(self.CURRENT_DIR, 'images/home_light.png')), # the image to be used in a dark theme
 			size=(20, 20))
 		self.home_btn = ctk.CTkButton(master=self.sidebar_frame, height=40, corner_radius=0, text=' Home', 
 			fg_color='transparent', image=self.home_btn_image, text_color=("gray10", "gray90"), 
 			hover_color=("gray70", "gray30"), font=('', 15), anchor='w', command=self.home_btn_event)
 		self.home_btn.grid(row=1, column=0, sticky='ew')
 
+		self.me_btn_image = ctk.CTkImage(
+			light_image=Image.open(os.path.join(self.CURRENT_DIR, 'images/add_user_dark.png')), # the image to be used in a light theme
+			dark_image=Image.open(os.path.join(self.CURRENT_DIR, 'images/add_user_light.png')), # the image to be used in a dark theme
+			size=(20, 20))
+		self.me_btn = ctk.CTkButton(master=self.sidebar_frame, height=40, corner_radius=0, text=' Me', 
+			fg_color='transparent', image=self.me_btn_image, text_color=("gray10", "gray90"), 
+			hover_color=("gray70", "gray30"), font=('', 15), anchor='w', command=self.me_btn_event)
+		self.me_btn.grid(row=2, column=0, sticky='ew')
+
 		self.faq_btn_image = ctk.CTkImage(
-			light_image = Image.open(os.path.join(self.CURRENT_DIR, 'chat_dark.png')), 
-			dark_image = Image.open(os.path.join(self.CURRENT_DIR, 'chat_light.png')), 
+			light_image = Image.open(os.path.join(self.CURRENT_DIR, 'images/chat_dark.png')), 
+			dark_image = Image.open(os.path.join(self.CURRENT_DIR, 'images/chat_light.png')), 
 			size = (20, 20))
 		self.faq_btn = ctk.CTkButton(master=self.sidebar_frame, height=40, corner_radius=0, text=' FAQ', 
 			fg_color='transparent', image=self.faq_btn_image, text_color=('gray10', 'gray90'),
 			hover_color=('gray70', 'gray30'), font=('', 15), anchor='w', command=self.faq_btn_event)
-		self.faq_btn.grid(row=2, column=0, sticky='ew')
+		self.faq_btn.grid(row=3, column=0, sticky='ew')
+
+		self.sidebar_buttons = self.home_btn, self.me_btn, self.faq_btn
+
 
 		self.appearance_mode_optionmenu = ctk.CTkOptionMenu(master=self.sidebar_frame, values=['Light', 'Dark', 'System'], command=self.set_appearance_mode)
 		self.appearance_mode_optionmenu.grid(row=7, column=0, pady=20, padx=20)
 		self.appearance_mode_optionmenu.set(self.default_appearance_mode)
+
+
+
+
 
 
 		# the home frame
@@ -122,7 +140,7 @@ class TodoApp(ctk.CTk):
 		self.home_user_label.grid(row=1, column=2, columnspan=2, pady=(15, 0))
 
 		self.todo_scrollable_frame = ctk.CTkScrollableFrame(master=self.home_frame, corner_radius=10, width=400, fg_color=("gray80", "gray20"))
-		self.todo_scrollable_frame.grid(row=3, column=2, columnspan=2, pady=(15,25), padx=30, sticky='news')
+		self.todo_scrollable_frame.grid(row=3, column=1, columnspan=4, pady=(15,25), padx=30, sticky='news')
 		self.todo_scrollable_frame.grid_columnconfigure(0, weight=1)
 		# self.todo_scrollable_frame.grid_rowconfigure(0, weight=1)
 
@@ -130,26 +148,30 @@ class TodoApp(ctk.CTk):
 		# self.main_textbox.grid(row=0, column=0, sticky='news')
 
 		self.todo_entry = ctk.CTkEntry(master=self.home_frame, font=("Fira Code", 16), height=35, placeholder_text="Enter your todos here...")
-		self.todo_entry.grid(row=4, column=2, columnspan=2, padx=40, pady=15, sticky='ew')
+		self.todo_entry.grid(row=4, column=2, columnspan=2, padx=15, pady=15, sticky='ew')
 
 		self.add_todo_btn = ctk.CTkButton(master=self.home_frame, hover_color=("gray70", "gray30"), text="Add Todo", fg_color='green', font=('Fira Code', 16), command=self.add_todo)
-		self.add_todo_btn.grid(row=5, column=2, padx=(40, 15), sticky='ew')
+		self.add_todo_btn.grid(row=5, column=2, padx=15, sticky='ew')
 
 		self.del_todo_btn = ctk.CTkButton(master=self.home_frame, hover_color=("gray70", "gray30"), text="Delete Todo", fg_color='red', font=('Fira Code', 16), command=self.delete_todo)
-		self.del_todo_btn.grid(row=5, column=3, padx=(15, 40), sticky='ew')
+		self.del_todo_btn.grid(row=5, column=3, padx=15, sticky='ew')
 
+
+
+		# the me frame
+		self.me_frame = ctk.CTkFrame(master=self.main_frame, corner_radius=0, fg_color='transparent')
 
 
 		# the faq frame
 		self.faq_frame = ctk.CTkFrame(master=self.main_frame, corner_radius=0, fg_color='transparent')
 
 
-		self.sidebar_buttons = self.home_btn, self.faq_btn
-		self.lastgridrow = -1
+
 
 		# setting some defaults
 		self.home_btn_event()
 		self.current_frame = self.home_frame
+		self.lastgridrow = -1
 
 		return
 
@@ -158,13 +180,13 @@ class TodoApp(ctk.CTk):
 		self.password = self.password_entry.get()
 
 		# create a connection and query the database to check for these credentials
-		conn = sqlite3.connect('database.db')
+		conn = sqlite3.connect('db.db')
 		c = conn.cursor()
 		query = f"""
 			SELECT * FROM users 
 			WHERE username='{self.username}' 
 			AND password = '{self.password}'
-			"""
+		"""
 		c.execute(query)
 		self.query_result = c.fetchall()
 		credentials_authorized = bool(self.query_result)
@@ -185,7 +207,6 @@ class TodoApp(ctk.CTk):
 	def add_todo(self):
 		todo_txt = self.todo_entry.get()
 		if todo_txt: 
-			# self.main_textbox.insert('0.0', todo+'\n\n') 
 			todo_label = ctk.CTkLabel(master=self.todo_scrollable_frame, text=todo_txt, font=("Fira Code", 16))
 			todo_label.grid(row=self.lastgridrow+1, column=0, sticky='news', pady=10)
 			todo_checkbox = ctk.CTkCheckBox(master=self.todo_scrollable_frame, text='', width=35)
@@ -211,6 +232,12 @@ class TodoApp(ctk.CTk):
 		for button in self.sidebar_buttons:
 			button.configure(fg_color='transparent')
 		self.home_btn.configure(fg_color=('gray70', 'gray30'))
+
+	def me_btn_event(self):
+		self.select_frame(self.me_frame)
+		for button in self.sidebar_buttons:
+			button.configure(fg_color='transparent')
+		self.me_btn.configure(fg_color=('gray70', 'gray30'))
 
 	def faq_btn_event(self):
 		self.select_frame(self.faq_frame)
